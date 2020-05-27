@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
-* Студент: [Марина Беклова](https://up.htmlacademy.ru/javascript/20/user/1289625).
-* Наставник: `Неизвестно`.
+- Студент: [Марина Беклова](https://up.htmlacademy.ru/javascript/20/user/1289625).
+- Наставник: [Ксения Толстых](https://htmlacademy.ru/profile/id618277).
 
 ---
 
