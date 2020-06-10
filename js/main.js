@@ -32,17 +32,20 @@ var getRandomElement = function (arr) {
 
 var getRandomWidthArr = function (arr) {
   var amount = getRandomInt(1, arr.length); // 1 - чтобы не было пустых строк, массивов
-  var newArr = arr.slice();
-  var result = [];
+  var shuffled = shuffleArray(arr.slice());
+  shuffled.length = amount;
+  return shuffled;
+};
 
-  for (var i = 0; i < amount; i++) {
-    var index = getRandomInt(0, newArr.length - 1);
-    var removed = newArr.splice(index, 1);
-    var element = removed[0];
-    result.push(element);
+var shuffleArray = function (arr) {
+  for (var i = 0; i < arr.length; i++) {
+    var index = getRandomInt(i, arr.length - 1);
+    var temp = arr[i];
+    arr[i] = arr[index];
+    arr[index] = temp;
   }
 
-  return result;
+  return arr;
 };
 
 var getRandomString = function (arr) {
@@ -52,44 +55,42 @@ var getRandomString = function (arr) {
 };
 
 var createAuthorObj = function (num) {
-  var obj = {};
-  obj.avatar = 'img/avatars/user0' + num + '.png';
-
-  return obj;
+  return {
+    avatar: 'img/avatars/user0' + num + '.png'
+  };
 };
 
 var createOfferObj = function (location) {
-  var obj = {};
-  obj.title = getRandomString(MOCK_VOCABULARY);
-  obj.address = location.x + ', ' + location.y;
-  obj.price = getRandomInt(1, 500000);
-  obj.type = getRandomElement(MOCK_TYPE);
-  obj.rooms = getRandomInt(1, 3);
-  obj.guests = getRandomInt(0, 2);
-  obj.checkin = getRandomElement(MOCK_CHECK);
-  obj.checkout = getRandomElement(MOCK_CHECK);
-  obj.features = getRandomWidthArr(MOCK_FEATURES);
-  obj.description = getRandomString(MOCK_VOCABULARY);
-  obj.photos = getRandomWidthArr(MOCK_PHOTOS);
-
-  return obj;
+  return {
+    title: getRandomString(MOCK_VOCABULARY),
+    address: location.x + ', ' + location.y,
+    price: getRandomInt(1, 500000),
+    type: getRandomElement(MOCK_TYPE),
+    rooms: getRandomInt(1, 3),
+    guests: getRandomInt(0, 2),
+    checkin: getRandomElement(MOCK_CHECK),
+    checkout: getRandomElement(MOCK_CHECK),
+    features: getRandomWidthArr(MOCK_FEATURES),
+    description: getRandomString(MOCK_VOCABULARY),
+    photos: getRandomWidthArr(MOCK_PHOTOS)
+  };
 };
 
 var createLocationObj = function () {
-  var obj = {};
-  obj.x = getRandomInt(0, mapPinsRect.width);
-  obj.y = getRandomInt(130, 630);
-
-  return obj;
+  return {
+    x: getRandomInt(0, mapPinsRect.width),
+    y: getRandomInt(130, 630)
+  };
 };
 
 var getRandomMock = function (num) {
-  var obj = {};
-  obj.location = createLocationObj();
-  obj.author = createAuthorObj(num);
-  obj.offer = createOfferObj(obj.location);
+  var location = createLocationObj();
 
-  return obj;
+  return {
+    location: location,
+    author: createAuthorObj(num),
+    offer: createOfferObj(location)
+  };
 };
 
 var getPinMocks = function (amount) {
@@ -128,5 +129,3 @@ var renderMapPins = function (amount) {
 map.classList.remove('map--faded');
 
 mapPins.appendChild(renderMapPins(8));
-
-
