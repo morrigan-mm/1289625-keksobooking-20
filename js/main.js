@@ -132,10 +132,7 @@ var renderMapPins = function (amount) {
   return fragment;
 };
 
-map.classList.remove('map--faded');
-
-mapPins.appendChild(renderMapPins(8));
-
+/*
 var setCardFeatures = function (elem, features) {
   var featuresList = elem.querySelectorAll('.popup__feature');
 
@@ -239,3 +236,98 @@ var card = cardTemplate.cloneNode(true);
 fillCard(card, getRandomMock(3));
 
 map.insertBefore(card, map.querySelector('.map__filters-container'));
+*/
+
+var mapFilters = map.querySelector('.map__filters');
+
+var setElementsActive = function (elementsList, active) {
+  for (var i = 0; i < elementsList.length; i++) {
+    if (active) {
+      elementsList[i].removeAttribute('disabled');
+    } else {
+      elementsList[i].setAttribute('disabled', '');
+    }
+  }
+};
+
+var adForm = document.querySelector('.ad-form');
+var adAddress = adForm.querySelector('#address');
+
+var mapPinMain = map.querySelector('.map__pin--main');
+var mapPinX = Math.round(parseInt(mapPinMain.style.left, 10) - mapPinMain.offsetWidth / 2);
+var mapPinY = Math.round(parseInt(mapPinMain.style.top, 10) - mapPinMain.offsetHeight);
+
+adAddress.value = mapPinX + 'px, ' + mapPinY + 'px';
+
+setElementsActive(mapFilters.children, false);
+setElementsActive(adForm.children, false);
+
+var setFormsActive = function (active) {
+  setElementsActive(mapFilters.children, active);
+  setElementsActive(adForm.children, active);
+
+  map.classList.toggle('map--faded', !active);
+  adForm.classList.toggle('ad-form--disabled', !active);
+
+  if (active) {
+    validateForm();
+  }
+};
+
+var onInteract = function (evt) {
+  if (evt.type === 'mousedown' && evt.button === 0 || evt.key === 'Enter') {
+    evt.preventDefault();
+    setFormsActive(true);
+    mapPins.appendChild(renderMapPins(8));
+  }
+};
+
+mapPinMain.addEventListener('mousedown', onInteract);
+mapPinMain.addEventListener('keydown', onInteract);
+
+var getCapacityValidity = function (capacity, rooms) {
+  var capacityMessage = '';
+  switch (rooms) {
+    case 1:
+      if (capacity !== 1) {
+        capacityMessage = '1 комната подходит только для 1 гостя';
+      }
+      break;
+    case 2:
+      if (capacity < 1 || capacity > 2) {
+        capacityMessage = '2 комнаты подходят только для 1-2 гостей';
+      }
+      break;
+    case 3:
+      if (capacity < 1 || capacity > 3) {
+        capacityMessage = '3 комнаты подходят только для 1-3 гостей';
+      }
+      break;
+    case 100:
+      if (capacity !== 0) {
+        capacityMessage = '100 комнат не подходят для гостей';
+      }
+      break;
+  }
+  return capacityMessage;
+};
+
+var validateForm = function () {
+  var formData = new FormData(adForm);
+  var rooms = parseInt(formData.get('rooms'), 10);
+  var capacity = parseInt(formData.get('capacity'), 10);
+
+  adForm.capacity.setCustomValidity(getCapacityValidity(capacity, rooms));
+};
+
+adForm.addEventListener('change', function () {
+  validateForm();
+});
+
+adForm.addEventListener('submit', function (evt) {
+  validateForm();
+
+  if (!adForm.checkValidity()) {
+    evt.preventDefault();
+  }
+});
