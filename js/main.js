@@ -17,10 +17,19 @@ var TYPES = {
   bungalo: 'бунгало'
 };
 
+var MOCK_AMOUNT = 8;
+
 var map = document.querySelector('.map');
 var mapPins = map.querySelector('.map__pins');
 var mapPinsRect = mapPins.getBoundingClientRect();
 var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
+var mapPinMain = map.querySelector('.map__pin--main');
+var mapPinX = Math.round(parseInt(mapPinMain.style.left, 10) - mapPinMain.offsetWidth / 2);
+var mapPinY = Math.round(parseInt(mapPinMain.style.top, 10) - mapPinMain.offsetHeight);
+var mapFilters = map.querySelector('.map__filters');
+var adForm = document.querySelector('.ad-form');
+
+// Моки.
 
 var getRandomInt = function (min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -110,6 +119,8 @@ var getPinMocks = function (amount) {
   return mocks;
 };
 
+// Рендеринг.
+
 var renderMapPin = function (elem) {
   var mapPinElement = mapPinTemplate.cloneNode(true);
   var pinImg = mapPinElement.querySelector('img');
@@ -121,16 +132,109 @@ var renderMapPin = function (elem) {
   return mapPinElement;
 };
 
-var renderMapPins = function (amount) {
-  var mockArr = getPinMocks(amount);
+var renderMapPins = function (pins) {
   var fragment = document.createDocumentFragment();
 
-  for (var i = 0; i < mockArr.length; i++) {
-    fragment.appendChild(renderMapPin(mockArr[i]));
+  for (var i = 0; i < pins.length; i++) {
+    fragment.appendChild(renderMapPin(pins[i]));
   }
 
   return fragment;
 };
+
+// Валидация.
+
+var getCapacityValidity = function (capacity, rooms) {
+  var capacityMessage = '';
+
+  if (rooms === 1 && capacity !== 1) {
+    capacityMessage = '1 комната подходит только для 1 гостя';
+  } else if (rooms === 2 && capacity < 1 || capacity > 2) {
+    capacityMessage = '2 комнаты подходят только для 1-2 гостей';
+  } else if (rooms === 3 && capacity < 1 || capacity > 3) {
+    capacityMessage = '3 комнаты подходят только для 1-3 гостей';
+  } else if (rooms === 100 && capacity !== 0) {
+    capacityMessage = '100 комнат не подходят для гостей';
+  }
+
+  return capacityMessage;
+};
+
+var validateForm = function () {
+  var formData = new FormData(adForm);
+  var rooms = parseInt(formData.get('rooms'), 10);
+  var capacity = parseInt(formData.get('capacity'), 10);
+
+  adForm.capacity.setCustomValidity(getCapacityValidity(capacity, rooms));
+};
+
+// Активация.
+
+var setElementsActive = function (elementsList, active) {
+  for (var i = 0; i < elementsList.length; i++) {
+    if (active) {
+      elementsList[i].removeAttribute('disabled');
+    } else {
+      elementsList[i].setAttribute('disabled', true);
+    }
+  }
+};
+
+var setFormsActive = function (active) {
+  setElementsActive(mapFilters.children, active);
+  setElementsActive(adForm.children, active);
+
+  map.classList.toggle('map--faded', !active);
+  adForm.classList.toggle('ad-form--disabled', !active);
+};
+
+var main = function () {
+
+  // Блочим все формы на старте.
+
+  setFormsActive(false);
+
+  // Устанавливаем начальные значения в форме и вешаем на нее обработчики.
+
+  adForm.address.value = mapPinX + 'px, ' + mapPinY + 'px';
+
+  adForm.addEventListener('change', function () {
+    validateForm();
+  });
+
+  adForm.addEventListener('submit', function (evt) {
+    validateForm();
+
+    if (!adForm.checkValidity()) {
+      evt.preventDefault();
+    }
+  });
+
+  // Вешаем обработчик на активацию.
+
+  var pinMocks = getPinMocks(MOCK_AMOUNT);
+
+  var onInteract = function (evt) {
+    if (evt.type === 'mousedown' && evt.button === 0 || evt.key === 'Enter') {
+      evt.preventDefault();
+      setFormsActive(true);
+      mapPins.appendChild(renderMapPins(pinMocks));
+
+      mapPinMain.removeEventListener('mousedown', onInteract);
+      mapPinMain.removeEventListener('keydown', onInteract);
+    }
+  };
+
+  mapPinMain.addEventListener('mousedown', onInteract);
+  mapPinMain.addEventListener('keydown', onInteract);
+};
+
+/**
+ * Можно передавать adForm, mapPinMain, mapPins, mapPinX, mapPinY, MOCK_AMOUNT параметрами, но не много ли их?
+ * Может, лучше оставить без параметров?
+ */
+
+main();
 
 /*
 var setCardFeatures = function (elem, features) {
@@ -237,97 +341,3 @@ fillCard(card, getRandomMock(3));
 
 map.insertBefore(card, map.querySelector('.map__filters-container'));
 */
-
-var mapFilters = map.querySelector('.map__filters');
-
-var setElementsActive = function (elementsList, active) {
-  for (var i = 0; i < elementsList.length; i++) {
-    if (active) {
-      elementsList[i].removeAttribute('disabled');
-    } else {
-      elementsList[i].setAttribute('disabled', '');
-    }
-  }
-};
-
-var adForm = document.querySelector('.ad-form');
-var adAddress = adForm.querySelector('#address');
-
-var mapPinMain = map.querySelector('.map__pin--main');
-var mapPinX = Math.round(parseInt(mapPinMain.style.left, 10) - mapPinMain.offsetWidth / 2);
-var mapPinY = Math.round(parseInt(mapPinMain.style.top, 10) - mapPinMain.offsetHeight);
-
-adAddress.value = mapPinX + 'px, ' + mapPinY + 'px';
-
-setElementsActive(mapFilters.children, false);
-setElementsActive(adForm.children, false);
-
-var setFormsActive = function (active) {
-  setElementsActive(mapFilters.children, active);
-  setElementsActive(adForm.children, active);
-
-  map.classList.toggle('map--faded', !active);
-  adForm.classList.toggle('ad-form--disabled', !active);
-
-  if (active) {
-    validateForm();
-  }
-};
-
-var onInteract = function (evt) {
-  if (evt.type === 'mousedown' && evt.button === 0 || evt.key === 'Enter') {
-    evt.preventDefault();
-    setFormsActive(true);
-    mapPins.appendChild(renderMapPins(8));
-  }
-};
-
-mapPinMain.addEventListener('mousedown', onInteract);
-mapPinMain.addEventListener('keydown', onInteract);
-
-var getCapacityValidity = function (capacity, rooms) {
-  var capacityMessage = '';
-  switch (rooms) {
-    case 1:
-      if (capacity !== 1) {
-        capacityMessage = '1 комната подходит только для 1 гостя';
-      }
-      break;
-    case 2:
-      if (capacity < 1 || capacity > 2) {
-        capacityMessage = '2 комнаты подходят только для 1-2 гостей';
-      }
-      break;
-    case 3:
-      if (capacity < 1 || capacity > 3) {
-        capacityMessage = '3 комнаты подходят только для 1-3 гостей';
-      }
-      break;
-    case 100:
-      if (capacity !== 0) {
-        capacityMessage = '100 комнат не подходят для гостей';
-      }
-      break;
-  }
-  return capacityMessage;
-};
-
-var validateForm = function () {
-  var formData = new FormData(adForm);
-  var rooms = parseInt(formData.get('rooms'), 10);
-  var capacity = parseInt(formData.get('capacity'), 10);
-
-  adForm.capacity.setCustomValidity(getCapacityValidity(capacity, rooms));
-};
-
-adForm.addEventListener('change', function () {
-  validateForm();
-});
-
-adForm.addEventListener('submit', function (evt) {
-  validateForm();
-
-  if (!adForm.checkValidity()) {
-    evt.preventDefault();
-  }
-});
