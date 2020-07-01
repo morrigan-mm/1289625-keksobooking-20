@@ -218,6 +218,12 @@ var setFormsActive = function (active) {
   adForm.classList.toggle('ad-form--disabled', !active);
 };
 
+var removeElement = function (element) {
+  if (element.parentElement) {
+    element.parentElement.removeChild(element);
+  }
+};
+
 // Определяем поля карточки объявления и рендерим его
 
 var setCardFeatures = function (elem, features) {
@@ -229,7 +235,7 @@ var setCardFeatures = function (elem, features) {
     });
 
     if (!isMatch) {
-      featuresList[i].parentElement.removeChild(featuresList[i]);
+      removeElement(featuresList[i]);
     }
   }
 };
@@ -244,6 +250,21 @@ var setCardPhotos = function (elem, photos) {
   }
 };
 
+var setCardField = function (elem, checkValue, writeValue, setAttr) {
+  writeValue = writeValue || checkValue;
+  setAttr = setAttr || 'textContent';
+
+  if (checkValue) {
+    if (typeof setAttr === 'string') {
+      elem[setAttr] = writeValue;
+    } else {
+      setAttr(elem, writeValue);
+    }
+  } else {
+    removeElement(elem);
+  }
+};
+
 var renderCard = function (pin) {
   var element = cardTemplate.cloneNode(true);
   var title = element.querySelector('.popup__title');
@@ -252,77 +273,26 @@ var renderCard = function (pin) {
   var type = element.querySelector('.popup__type');
   var capacity = element.querySelector('.popup__text--capacity');
   var time = element.querySelector('.popup__text--time');
-  var features = element.querySelector('.popup__features');
   var description = element.querySelector('.popup__description');
-  var photos = element.querySelector('.popup__photos');
   var avatar = element.querySelector('.popup__avatar');
+  var features = element.querySelector('.popup__features');
+  var photos = element.querySelector('.popup__photos');
 
-  if (pin.offer.title) {
-    title.textContent = pin.offer.title;
-  } else {
-    title.parentElement.removeChild(title);
-  }
-
-  if (pin.offer.address) {
-    address.textContent = pin.offer.address;
-  } else {
-    address.parentElement.removeChild(address);
-  }
-
-  if (pin.offer.price) {
-    price.textContent = pin.offer.price + '₽/ночь';
-  } else {
-    price.parentElement.removeChild(price);
-  }
-
-  if (pin.offer.type) {
-    type.textContent = TYPES[pin.offer.type];
-  } else {
-    type.parentElement.removeChild(type);
-  }
-
-  if (pin.offer.rooms && pin.offer.guests) {
-    capacity.textContent = pin.offer.rooms + ' комнаты для ' + pin.offer.guests + ' гостей';
-  } else {
-    capacity.parentElement.removeChild(capacity);
-  }
-
-  if (pin.offer.checkin && pin.offer.checkout) {
-    time.textContent = 'Заезд после ' + pin.offer.checkin + ', выезд до ' + pin.offer.checkout;
-  } else {
-    time.parentElement.removeChild(time);
-  }
-
-  if (pin.offer.description) {
-    description.textContent = pin.offer.description;
-  } else {
-    description.parentElement.removeChild(description);
-  }
-
-  if (pin.author.avatar) {
-    avatar.src = pin.author.avatar;
-  } else {
-    avatar.parentElement.removeChild(avatar);
-  }
-
-  if (pin.offer.features && pin.offer.features.length !== 0) {
-    setCardFeatures(features, pin.offer.features);
-  } else {
-    features.parentElement.removeChild(features);
-  }
-
-  if (pin.offer.photos && pin.offer.photos.length !== 0) {
-    setCardPhotos(photos, pin.offer.photos);
-  } else {
-    photos.parentElement.removeChild(photos);
-  }
+  setCardField(title, pin.offer.title);
+  setCardField(address, pin.offer.address);
+  setCardField(price, pin.offer.price, pin.offer.price + '₽/ночь');
+  setCardField(type, pin.offer.type, TYPES[pin.offer.type]);
+  setCardField(capacity, pin.offer.rooms && pin.offer.guests, pin.offer.rooms + ' комнаты для ' + pin.offer.guests + ' гостей');
+  setCardField(time, pin.offer.checkin && pin.offer.checkout, 'Заезд после ' + pin.offer.checkin + ', выезд до ' + pin.offer.checkout);
+  setCardField(description, pin.offer.description);
+  setCardField(avatar, pin.author.avatar, null, 'src');
+  setCardField(features, pin.offer.features && pin.offer.features.length !== 0, pin.offer.features, setCardFeatures);
+  setCardField(photos, pin.offer.photos && pin.offer.photos.length !== 0, pin.offer.photos, setCardPhotos);
 
   var closeButton = element.querySelector('.popup__close');
 
   var remove = function () {
-    if (element.parentElement) {
-      element.parentElement.removeChild(element);
-    }
+    removeElement(element);
     document.removeEventListener('keydown', onCardClose);
     closeButton.removeEventListener('click', onCardClose);
   };
