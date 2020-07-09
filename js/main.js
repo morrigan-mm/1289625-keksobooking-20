@@ -5,11 +5,12 @@
 
   var data = window.mock.getData(MOCK_AMOUNT);
 
-  var map = window.map.initMap(data, function onActivate() {
+  var map = window.map.initMap(data, function onAddressChange() {
     form.setFormActive(true);
+    form.setAddress(map.getAddress());
   });
 
-  var form = window.form.initForm(map.address);
+  var form = window.form.initForm(map.getAddress());
 })();
 
 

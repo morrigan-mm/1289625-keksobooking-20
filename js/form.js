@@ -55,10 +55,14 @@
     adForm.capacity.setCustomValidity(getCapacityValidity(capacity, rooms));
   };
 
+  var setAddress = function (address) {
+    adForm.address.value = address.x + 'px, ' + address.y + 'px';
+  };
+
   var initForm = function (address) {
     setFormActive(false);
 
-    adForm.address.value = address.x + 'px, ' + address.y + 'px';
+    setAddress(address);
 
     adForm.addEventListener('change', function () {
       validateForm();
@@ -74,6 +78,7 @@
 
     return {
       setFormActive: setFormActive,
+      setAddress: setAddress
     };
   };
 
