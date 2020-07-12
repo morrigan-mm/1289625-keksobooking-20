@@ -4,9 +4,14 @@
   var MOCK_AMOUNT = 8;
 
   var data = window.mock.getData(MOCK_AMOUNT);
+  var active = false;
 
   var map = window.map.initMap(data, function onAddressChange() {
-    form.setFormActive(true);
+    if (!active) {
+      form.setFormActive(true);
+      active = true;
+    }
+
     form.setAddress(map.getAddress());
   });
 

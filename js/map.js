@@ -2,9 +2,6 @@
 
 (function () {
   var PIN_MAIN_OFFSET = 18;
-  var PIN_MAIN_MIN_X = 0;
-  var PIN_MAIN_MIN_Y = 130;
-  var PIN_MAIN_MAX_Y = 630;
 
   var map = document.querySelector('.map');
   var mapPinMain = map.querySelector('.map__pin--main');
@@ -56,7 +53,7 @@
           y: Math.floor(address.y + mapPinMain.offsetHeight / 2 + PIN_MAIN_OFFSET),
         };
 
-        setAddress(activeAddress.x, activeAddress.y);
+        setAddress(activeAddress);
 
         onAddressChange();
       }
@@ -103,26 +100,9 @@
       };
     };
 
-    var setAddress = function (x, y) {
-      if (x < PIN_MAIN_MIN_X) {
-        x = PIN_MAIN_MIN_X;
-      } else if (x > map.offsetWidth) {
-        x = map.offsetWidth;
-      }
-      if (y < PIN_MAIN_MIN_Y) {
-        y = PIN_MAIN_MIN_Y;
-      } else if (y > PIN_MAIN_MAX_Y) {
-        y = PIN_MAIN_MAX_Y;
-      }
-
-      address.x = x;
-      address.y = y;
-
-      var top = y - mapPinMain.offsetHeight - PIN_MAIN_OFFSET;
-      var left = x - mapPinMain.offsetWidth / 2;
-
-      mapPinMain.style.top = top + 'px';
-      mapPinMain.style.left = left + 'px';
+    var setAddress = function (newAddress) {
+      address.x = newAddress.x;
+      address.y = newAddress.y;
     };
 
     var renderPins = function () {
@@ -145,21 +125,9 @@
     mapPinMain.addEventListener('mousedown', onPinMainClick);
     mapPinMain.addEventListener('keydown', onPinMainClick);
 
-    var moveStartAddress;
-
-    window.move.initMove(mapPinMain, function (stage, shift) {
-      if (stage === 'movestart') {
-        moveStartAddress = getAddress();
-      }
-      if (stage === 'move') {
-        var x = moveStartAddress.x + shift.x;
-        var y = moveStartAddress.y + shift.y;
-        setAddress(x, y);
-        onAddressChange();
-      }
-      if (stage === 'moveend') {
-        return;
-      }
+    window.move.initMove(mapPinMain, function (moveAddress) {
+      setAddress(moveAddress);
+      onAddressChange();
     });
 
     return {
