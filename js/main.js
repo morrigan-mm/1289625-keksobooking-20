@@ -1,12 +1,11 @@
 'use strict';
 
 (function () {
-  var MOCK_AMOUNT = 8;
-
-  var data = window.mock.getData(MOCK_AMOUNT);
+  // var MOCK_AMOUNT = 8;
   var active = false;
 
-  var map = window.map.initMap(data, function onAddressChange() {
+
+  var map = window.map.initMap(function onAddressChange() {
     if (!active) {
       form.setFormActive(true);
       active = true;
@@ -16,6 +15,7 @@
   });
 
   var form = window.form.initForm(map.getAddress());
+  // window.mock.getData(MOCK_AMOUNT);
 })();
 
 
