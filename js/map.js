@@ -28,12 +28,24 @@
     };
   };
 
-  var initMap = function (data, onAddressChange) {
+  var initMap = function (onAddressChange) {
     var address = getInitialAddress();
 
     var activeCard;
     var activePin;
     var pins;
+
+    var data = [];
+
+    var onSuccessLoad = function (serverData) {
+      data = serverData;
+      pins = renderPins();
+      mapPins.appendChild(pins.fragment);
+    };
+
+    var onErrorLoad = function (errorMessage) {
+      window.message.errorMessage(errorMessage);
+    };
 
     var onPinMainClick = function (evt) {
       if (evt.type === 'mousedown' && evt.button === 0 || evt.key === 'Enter') {
@@ -42,9 +54,7 @@
         mapPinMain.removeEventListener('mousedown', onPinMainClick);
         mapPinMain.removeEventListener('keydown', onPinMainClick);
 
-        pins = renderPins();
-
-        mapPins.appendChild(pins.fragment);
+        window.load(onSuccessLoad, onErrorLoad);
 
         setMapActive(true);
 
