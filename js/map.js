@@ -9,12 +9,6 @@
   var mapFilters = map.querySelector('.map__filters');
   var mapFiltersContainer = map.querySelector('.map__filters-container');
 
-  var setMapActive = function (active) {
-    window.utils.setElementsActive(mapFilters.children, active);
-
-    map.classList.toggle('map--faded', !active);
-  };
-
   var getInitialAddress = function () {
     var markerTop = parseInt(mapPinMain.style.top, 10);
     var markerLeft = parseInt(mapPinMain.style.left, 10);
@@ -28,14 +22,36 @@
     };
   };
 
+  var initial = {
+    address: getInitialAddress(),
+    markerTop: mapPinMain.offsetTop,
+    markerLeft: mapPinMain.offsetLeft
+  };
+
   var initMap = function (onAddressChange) {
-    var address = getInitialAddress();
+    var address = {
+      x: initial.address.x,
+      y: initial.address.y,
+    };
 
     var activeCard;
     var activePin;
     var pins;
 
     var data = [];
+
+    var setMapActive = function (active) {
+      window.utils.setElementsActive(mapFilters.children, active);
+
+      map.classList.toggle('map--faded', !active);
+
+      if (!active) {
+        Array.from(mapPins.querySelectorAll('.map__pin:not(.map__pin--main)')).forEach(window.utils.removeElement);
+        mapPinMain.style.top = initial.markerTop + 'px';
+        mapPinMain.style.left = initial.markerLeft + 'px';
+        setAddress(initial.address);
+      }
+    };
 
     var onSuccessLoad = function (serverData) {
       data = serverData;
@@ -51,10 +67,7 @@
       if (evt.type === 'mousedown' && evt.button === 0 || evt.key === 'Enter') {
         evt.preventDefault();
 
-        mapPinMain.removeEventListener('mousedown', onPinMainClick);
-        mapPinMain.removeEventListener('keydown', onPinMainClick);
-
-        window.load(onSuccessLoad, onErrorLoad);
+        window.server.load(onSuccessLoad, onErrorLoad);
 
         setMapActive(true);
 
@@ -130,8 +143,6 @@
       return result;
     };
 
-    setMapActive(false);
-
     mapPinMain.addEventListener('mousedown', onPinMainClick);
     mapPinMain.addEventListener('keydown', onPinMainClick);
 
@@ -141,11 +152,10 @@
     });
 
     return {
-      getAddress: getAddress
+      getAddress: getAddress,
+      setMapActive: setMapActive
     };
   };
-
-  setMapActive(false);
 
   window.map = {
     initMap: initMap,
