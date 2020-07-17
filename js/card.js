@@ -42,7 +42,7 @@
     }
   };
 
-  var renderCard = function (dataItem, index, onClose) {
+  var renderCard = function (dataItem, onClose) {
     var element = cardTemplate.cloneNode(true);
     var title = element.querySelector('.popup__title');
     var address = element.querySelector('.popup__text--address');
@@ -77,7 +77,7 @@
     var onCardClose = function (evt) {
       if (evt.type === 'click' || evt.key === 'Escape') {
         evt.preventDefault();
-        onClose(index);
+        onClose(dataItem);
         remove();
       }
     };
