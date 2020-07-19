@@ -7,12 +7,12 @@
   var PIN_OFFSET_Y = -PIN_OFFSET_HEIGHT;
   var mapPinTemplate = document.querySelector('#pin').content.querySelector('.map__pin');
 
-  var renderPin = function (dataItem, index, onClick) {
+  var renderPin = function (dataItem, onClick) {
     var element = mapPinTemplate.cloneNode(true);
     var pinImg = element.querySelector('img');
     element.style.left = dataItem.location.x + PIN_OFFSET_X + 'px';
     element.style.top = dataItem.location.y + PIN_OFFSET_Y + 'px';
-    element.dataset.pin = index;
+    element.dataset.pin = dataItem.id;
     pinImg.src = dataItem.author.avatar;
     pinImg.alt = dataItem.offer.title;
 
@@ -22,7 +22,7 @@
 
     element.addEventListener('click', function (evt) {
       evt.preventDefault();
-      onClick(index);
+      onClick(dataItem);
     });
 
     return {
