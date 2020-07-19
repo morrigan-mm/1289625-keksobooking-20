@@ -20,16 +20,16 @@
       newFiltersObj.rooms = parseInt(housingRooms.value, 10);
     }
 
-    if (housingPrice.value !== 'any') {
-      if (housingPrice.value === 'low') {
+    switch (housingPrice.value) {
+      case 'low':
         newFiltersObj.price = {from: 0, to: 10000};
-      }
-      if (housingPrice.value === 'middle') {
+        break;
+      case 'middle':
         newFiltersObj.price = {from: 10000, to: 50000};
-      }
-      if (housingPrice.value === 'high') {
+        break;
+      case 'high':
         newFiltersObj.price = {from: 50000, to: 1000000};
-      }
+        break;
     }
 
     if (housingGuests.value !== 'any') {
@@ -46,11 +46,11 @@
 
   var callback;
 
-  mapFilters.addEventListener('change', function () {
+  mapFilters.addEventListener('change', window.debounce(function () {
     if (callback) {
       callback(parseFilters());
     }
-  });
+  }, 500));
 
   mapFilters.addEventListener('submit', function (evt) {
     evt.preventDefault();
