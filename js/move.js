@@ -88,6 +88,6 @@
   };
 
   window.move = {
-    initMove: initMove
+    init: initMove
   };
 })();

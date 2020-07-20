@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  var PIN_MAX = 5;
   var PIN_MAIN_OFFSET = 18;
 
   var map = document.querySelector('.map');
@@ -61,7 +62,7 @@
       map.classList.toggle('map--faded', !active);
 
       if (!active) {
-        window.filters.resetFilters();
+        window.filters.reset();
         window.utils.setElementsActive(mapFilters.children, !active);
         mapPinMain.style.top = initial.markerTop + 'px';
         mapPinMain.style.left = initial.markerLeft + 'px';
@@ -73,24 +74,34 @@
     };
 
     var applyFilters = function (items, filters) {
-      return items.filter(function (item) {
+      var result = [];
+
+      for (var i = 0; i < items.length && result.length < PIN_MAX; i++) {
+        var item = items[i];
+
         if (filters.type && filters.type !== item.offer.type) {
-          return false;
+          continue;
         }
         if (filters.price && (filters.price.from > item.offer.price || filters.price.to < item.offer.price)) {
-          return false;
+          continue;
         }
         if (filters.rooms && filters.rooms !== item.offer.rooms) {
-          return false;
+          continue;
         }
         if ((filters.guests || filters.guests === 0) && filters.guests !== item.offer.guests) {
-          return false;
+          continue;
         }
 
-        return filters.features.every(function (feature) {
+        var featuresMatch = filters.features.every(function (feature) {
           return item.offer.features.includes(feature);
         });
-      });
+
+        if (featuresMatch) {
+          result.push(item);
+        }
+      }
+
+      return result;
     };
 
     var onSuccessLoad = function (serverData) {
@@ -104,7 +115,7 @@
 
       if (data.length > 0) {
         window.utils.setElementsActive(mapFilters.children, true);
-        window.filters.initFilters(function (filters) {
+        window.filters.init(function (filters) {
           renderPins(applyFilters(data, filters));
         });
 
@@ -112,8 +123,8 @@
       }
     };
 
-    var onErrorLoad = function (errorMessage) {
-      window.message.errorMessage(errorMessage);
+    var onErrorLoad = function (message) {
+      window.message.error(message);
     };
 
     var onPinMainClick = function (evt) {
@@ -169,7 +180,7 @@
 
       activePin = pin;
 
-      activeCard = window.card.renderCard(dataItem, onCardClose);
+      activeCard = window.card.render(dataItem, onCardClose);
 
       map.insertBefore(activeCard.element, mapFiltersContainer);
 
@@ -191,11 +202,11 @@
     var renderPins = function (items) {
       clearPins();
 
-      var amount = Math.min(items.length, 5);
+      var amount = Math.min(items.length, PIN_MAX);
 
       for (var i = 0; i < amount; i++) {
         var item = items[i];
-        var pin = window.pin.renderPin(item, onPinClick);
+        var pin = window.pin.render(item, onPinClick);
         pins.fragment.appendChild(pin.element);
         pins.pinObj[item.id] = pin;
       }
@@ -206,7 +217,7 @@
     mapPinMain.addEventListener('mousedown', onPinMainClick);
     mapPinMain.addEventListener('keydown', onPinMainClick);
 
-    window.move.initMove(mapPinMain, function (moveAddress) {
+    window.move.init(mapPinMain, function (moveAddress) {
       setAddress(moveAddress);
       onAddressChange();
     });
@@ -218,6 +229,6 @@
   };
 
   window.map = {
-    initMap: initMap,
+    init: initMap,
   };
 })();

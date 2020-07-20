@@ -5,11 +5,11 @@
   // init map
 
   var onAddressChange = function () {
-    form.setFormActive(true);
+    form.setActive(true);
     form.setAddress(map.getAddress());
   };
 
-  var map = window.map.initMap(onAddressChange);
+  var map = window.map.init(onAddressChange);
 
   map.setMapActive(false);
 
@@ -17,25 +17,25 @@
 
   var onStatusChange = function (stage) {
     switch (stage) {
-      case 'sending':
-        form.setFormActive(false);
+      case window.form.Status.SENDING:
+        form.setActive(false);
         break;
-      case 'reset':
-      case 'success':
-        form.setFormActive(false);
+      case window.form.Status.RESET:
+      case window.form.Status.SUCCESS:
+        form.setActive(false);
         map.setMapActive(false);
         break;
-      case 'error':
-        form.setFormActive(true);
+      case window.form.Status.ERROR:
+        form.setActive(true);
         return;
     }
 
     form.setAddress(map.getAddress());
   };
 
-  var form = window.form.initForm(map.getAddress(), onStatusChange);
+  var form = window.form.init(map.getAddress(), onStatusChange);
 
-  form.setFormActive(false);
+  form.setActive(false);
 })();
 
 

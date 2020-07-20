@@ -1,6 +1,13 @@
 'use strict';
 
 (function () {
+  var FormStatus = {
+    ERROR: 'error',
+    RESET: 'reset',
+    SENDING: 'sending',
+    SUCCESS: 'success',
+  };
+
   var adForm = document.querySelector('.ad-form');
   var isActive;
 
@@ -76,14 +83,14 @@
     };
 
     var onSuccessSave = function () {
-      window.message.successMessage();
+      window.message.success();
       resetForm();
-      onStatusChange('success');
+      onStatusChange(FormStatus.SUCCESS);
     };
 
     var onErrorSave = function () {
-      window.message.errorMessage();
-      onStatusChange('error');
+      window.message.error();
+      onStatusChange(FormStatus.ERROR);
     };
 
     adForm.addEventListener('change', function () {
@@ -96,7 +103,7 @@
       // сброс формы не сработает пока обработчик не закончит выполнение (даже если вызывать form.reset() вручную),
       // поэтому мы откладываем вызов колбэка onStatusChange, чтобы форма успела сброситься
       setTimeout(function () {
-        onStatusChange('reset');
+        onStatusChange(FormStatus.RESET);
       });
     });
 
@@ -110,16 +117,17 @@
 
       window.server.save(new FormData(adForm), onSuccessSave, onErrorSave);
 
-      onStatusChange('sending');
+      onStatusChange(FormStatus.SENDING);
     });
 
     return {
-      setFormActive: setFormActive,
+      setActive: setFormActive,
       setAddress: setAddress
     };
   };
 
   window.form = {
-    initForm: initForm
+    Status: FormStatus,
+    init: initForm,
   };
 })();

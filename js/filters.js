@@ -1,6 +1,15 @@
 'use strict';
 
 (function () {
+  var CHANGE_DEBOUNCE_MS = 500;
+  var VALUE_ANY = 'any';
+
+  var Price = {
+    LOW: 'low',
+    MIDDLE: 'middle',
+    HIGH: 'high',
+  };
+
   var mapFilters = document.querySelector('.map__filters');
 
   var parseFilters = function () {
@@ -12,27 +21,27 @@
     var housingGuests = mapFilters['housing-guests'];
     var housingFeatures = mapFilters['housing-features'];
 
-    if (housingType.value !== 'any') {
+    if (housingType.value !== VALUE_ANY) {
       newFiltersObj.type = housingType.value;
     }
 
-    if (housingRooms.value !== 'any') {
+    if (housingRooms.value !== VALUE_ANY) {
       newFiltersObj.rooms = parseInt(housingRooms.value, 10);
     }
 
     switch (housingPrice.value) {
-      case 'low':
+      case Price.LOW:
         newFiltersObj.price = {from: 0, to: 10000};
         break;
-      case 'middle':
+      case Price.MIDDLE:
         newFiltersObj.price = {from: 10000, to: 50000};
         break;
-      case 'high':
+      case Price.HIGH:
         newFiltersObj.price = {from: 50000, to: 1000000};
         break;
     }
 
-    if (housingGuests.value !== 'any') {
+    if (housingGuests.value !== VALUE_ANY) {
       newFiltersObj.guests = parseInt(housingGuests.value, 10);
     }
 
@@ -50,7 +59,7 @@
     if (callback) {
       callback(parseFilters());
     }
-  }, 500));
+  }, CHANGE_DEBOUNCE_MS));
 
   mapFilters.addEventListener('submit', function (evt) {
     evt.preventDefault();
@@ -65,7 +74,7 @@
   };
 
   window.filters = {
-    initFilters: initFilters,
-    resetFilters: resetFilters
+    init: initFilters,
+    reset: resetFilters
   };
 })();

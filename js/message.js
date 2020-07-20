@@ -43,7 +43,7 @@
   };
 
   window.message = {
-    errorMessage: createErrorMessage,
-    successMessage: createSuccessMessage
+    error: createErrorMessage,
+    success: createSuccessMessage
   };
 })();
